@@ -41,10 +41,10 @@ app.post("/", (req, res) => {
     res.status(401).send("로그인 실패");
   } else {
     const accessToken = jwt.sign({userId:userInfo.user_id}, 
-    secretKey, {expiredIn:1000 * 10 * 10})
+    secretKey, {expiresIn:1000 * 10 * 10})
     console.log(accessToken)
-    res.cookie('accessToken', accessToken)
-    res.send("토큰 생성 완료!");
+    
+    res.send(accessToken);
     // 1. 유저정보가 있는 경우 accessToken을 발급하는 로직을 작성하세요.(sign)
     // 이곳에 코드를 작성하세요.
     // 2. 응답으로 accessToken을 클라이언트로 전송하세요. (res.send 사용)
@@ -54,7 +54,8 @@ app.post("/", (req, res) => {
 
 // 클라이언트에서 get 요청을 받은 경우
 app.get("/", (req, res) => {
-  const {accessToken} = req.cookies
+const accessToken = req.headers.authorization.split('')[1]
+  //const {accessToken} = req.cookies
   const payload = jwt.verify(accessToken, secretKey)
   const userInfo = users.find(el => el.user_id === payload.user_id)
   return res.json(userInfo)
@@ -64,9 +65,5 @@ app.get("/", (req, res) => {
   // 이곳에 코드를 작성하세요.
 });
 
-app.delete('/',(req, res) => {
-  res.clearCookie('accessToken')
-  res.send('토큰 삭제 완료!')
-})
 
 app.listen(3000, () => console.log("서버 실행!"));
